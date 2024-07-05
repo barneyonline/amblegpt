@@ -1,5 +1,7 @@
 frigate_server_ip: YOUR_FRIGATE_IP
 frigate_server_port: 5000
+scrypted_server_ip: YOUR_SCRYPTED_IP
+scrypted_server_port: 9090
 mqtt_broker: YOUR_MQTT_BROKER_IP
 mqtt_port: 1883
 result_language: english
@@ -14,7 +16,7 @@ prompt: > #optional
   The default prompt can be found in mqtt_client.py
 
 per_camera_configuration: #optional
-  # The camera name must match Frigate
+  # The camera name must match Frigate or Scrypted
   Front Door:
     # The custom prompt is optional and is used to provide more context for GPT to better understand the footage.
     # This will be inserted into the prompt before sending it to GPT.
