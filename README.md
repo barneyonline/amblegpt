@@ -1,3 +1,5 @@
+Protoype support for [Scrypted](https://github.com/koush/scrypted)
+
 # AmbleGPT
 
 Video surveilance footage analyst powered by GPT-4o.
