@@ -265,7 +265,9 @@ def download_scrypted_video_clip(event_id, gap_secs):
         logging.error("Scrypted server IP is not configured")
         return []
     clip_url = f"http://{SRIPTED_SERVER_IP}:{SRIPTED_SERVER_PORT}{Scrypted_CLIP_ENDPOINT.format(event_id)}"
+    logging.info(f"Requesting Scrypted video clip from URL: {clip_url}")
     response = requests.get(clip_url)
+    logging.info(f"Scrypted response status code: {response.status_code}")
     if response.status_code == 200:
         temp_dir = tempfile.TemporaryDirectory()
         clip_filename = os.path.join(temp_dir.name, f"scrypted_clip_{event_id}.mp4")
