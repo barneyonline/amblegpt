@@ -1,7 +1,7 @@
 paho-mqtt==1.6.1
-python-dotenv
-requests
-Pillow
-imageio
-imageio[ffmpeg]
-pyyaml
+python-dotenv==1.0.0
+requests==2.31.0
+Pillow==10.0.0
+imageio==2.31.0
+imageio[ffmpeg]==2.31.0
+pyyaml==6.0.1
