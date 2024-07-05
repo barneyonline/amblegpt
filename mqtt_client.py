@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import base64
 import pathlib
 import subprocess
@@ -63,46 +62,38 @@ You are reviewing some continuous frames of a video footage as of {EVENT_START_T
 Please describe what happend in the video in json format. Do not print any markdown syntax!
 Answer like the following:
 {{
-    "num_persons" : 2,
-    "persons" : [
-    {{
-        "height_in_meters": 1.75,
-        "duration_of_stay_in_seconds": 15,
-        "gender": "female",
-        "age": 50
-    }},
-    {{
-        "height_in_meters": 1.60,
-        "duration_of_stay_in_seconds": 15,
-        "gender": "unknown",
-        "age": 36
-    }},
-    "summary": "SUMMARY"
-    "title": "TITLE"
+ "num_persons" : 2,
+ "persons" : [
+{{
+ "height_in_meters": 1.75,
+ "duration_of_stay_in_seconds": 15,
+ "gender": "female",
+ "age": 50
+}},
+{{
+ "height_in_meters": 1.60,
+ "duration_of_stay_in_seconds": 15,
+ "gender": "unknown",
+ "age": 36
+}},
+ "summary": "SUMMARY"
+ "title": "TITLE"
 }}
-
 You can guess their height and gender . It is 100 percent fine to be inaccurate.
-
 You can measure their duration of stay given the time gap between frames.
-
 You should take the time of event into account.
 For example, if someone is trying to open the door in the middle of the night, it would be suspicious. Be sure to mention it in the SUMMARY.
-
 Mostly importantly, be sure to mention any unusualness considering all the context.
-
 Some example SUMMARIES are
-    1. One person walked by towards right corner with her dog without paying attention towards the camera's direction.
-    2. One Amazon delivery person (in blue vest) dropped off a package.
-    3. A female is waiting, facing the door.
-    4. Suspicious: A person is wandering without obvious purpose in the middle of the night, which seems suspicious.
-    5. Suspicious: A person walked into the frame from outside, picked up a package, and left.
-       The person didn't wear any uniform so this doesn't look like a routine package pickup. Be aware of potential package theft!
-
+ 1. One person walked by towards right corner with her dog without paying attention towards the camera's direction.
+ 2. One Amazon delivery person (in blue vest) dropped off a package.
+ 3. A female is waiting, facing the door.
+ 4. Suspicious: A person is wandering without obvious purpose in the middle of the night, which seems suspicious.
+ 5. Suspicious: A person walked into the frame from outside, picked up a package, and left.
+ The person didn't wear any uniform so this doesn't look like a routine package pickup. Be aware of potential package theft!
 TITLE is a one sentence summary of the event. Use no more than 10 words.
-
 Write your answer in {RESULT_LANGUAGE} language.
 """
-
 PROMPT_TEMPLATE = config.get("prompt", DEFAULT_PROMPT)
 RESULT_LANGUAGE = config.get("result_language", "english")
 PER_CAMERA_CONFIG = config.get("per_camera_configuration", {})
@@ -221,7 +212,7 @@ def extract_frames_ffmpeg(video_path, gap_secs):
         "-vf",
         f"fps=1/{gap_secs},scale=480:480:force_original_aspect_ratio=decrease",
         "-q:v",
-        "2",  # Quality level for JPEG
+        "2", # Quality level for JPEG
         os.path.join(frames_dir, "frame_%04d.jpg"),
     ]
     # Execute FFmpeg command
@@ -229,11 +220,11 @@ def extract_frames_ffmpeg(video_path, gap_secs):
     # Read and encode the extracted frames
     frames = []
     for frame_file in sorted(os.listdir(frames_dir)):
-        if not frame_file.endswith(".jpg"):  # to exclude .DS_Store etc
+        if not frame_file.endswith(".jpg"): # to exclude .DS_Store etc
             continue
         with open(os.path.join(frames_dir, frame_file), "rb") as file:
             frame_bytes = file.read()
-        frames.append(base64.b64encode(frame_bytes).decode("utf-8"))
+            frames.append(base64.b64encode(frame_bytes).decode("utf-8"))
     logging.info(f"Got {len(frames)} frames from video")
     return frames
 
@@ -248,7 +239,9 @@ def download_frigate_video_clip(event_id, gap_secs):
         logging.error("Frigate server IP is not configured")
         return []
     clip_url = f"http://{FRIGATE_SERVER_IP}:{FRIGATE_SERVER_PORT}{FRIGATE_CLIP_ENDPOINT.format(event_id)}"
+    logging.info(f"Requesting Frigate video clip from URL: {clip_url}")
     response = requests.get(clip_url)
+    logging.info(f"Frigate response status code: {response.status_code}")
     if response.status_code == 200:
         temp_dir = tempfile.TemporaryDirectory()
         clip_filename = os.path.join(temp_dir.name, f"frigate_clip_{event_id}.mp4")
@@ -260,7 +253,7 @@ def download_frigate_video_clip(event_id, gap_secs):
         logging.error(
             f"Failed to retrieve Frigate video clip for event {event_id}. Status code: {response.status_code}"
         )
-    return []
+        return []
 
 def download_scrypted_video_clip(event_id, gap_secs):
     if not SRIPTED_SERVER_IP:
@@ -281,13 +274,12 @@ def download_scrypted_video_clip(event_id, gap_secs):
         logging.error(
             f"Failed to retrieve Scrypted video clip for event {event_id}. Status code: {response.status_code}"
         )
-    return []
+        return []
 
 def process_message(payload):
     try:
         event_id = payload["after"]["id"]
         camera_name = payload["after"]["camera"]
-        
         if VIDEO_SERVICE == "frigate":
             video_base64_frames = download_frigate_video_clip(event_id, gap_secs=GAP_SECS)
         elif VIDEO_SERVICE == "scrypted":
@@ -295,10 +287,8 @@ def process_message(payload):
         else:
             logging.error("Unsupported video service configured")
             return
-        
         if len(video_base64_frames) == 0:
             return
-        
         local_time_str = get_local_time_str(ts=payload["after"]["start_time"])
         prompt = generate_prompt(GAP_SECS, local_time_str, camera_name)
         response = prompt_gpt4_with_video_frames(prompt, video_base64_frames)
