@@ -1,22 +1,16 @@
 # syntax=docker/dockerfile:1.4
-
 # Step 1: Use a Python image to install dependencies
 FROM python:3.11 as builder
-
 RUN pip install --upgrade pip
-
 RUN apt-get update \
     && apt-get install -y --no-install-recommends gcc python3-dev \
     && rm -rf /var/lib/apt/lists/* \
     && pip install psutil \
     && apt-get purge -y --auto-remove gcc python3-dev
-
 WORKDIR /src
-
 # Copy the requirements file and install dependencies
 COPY requirements.txt .
 RUN pip3 wheel --wheel-dir=/wheels -r requirements.txt
-
 
 FROM python:3.11-slim
 ARG TARGETARCH
@@ -30,7 +24,6 @@ if [[ "${TARGETARCH}" == "amd64" ]]; then
     tar -xf btbn-ffmpeg.tar.xz -C /usr/lib/btbn-ffmpeg --strip-components 1
     rm -rf btbn-ffmpeg.tar.xz /usr/lib/btbn-ffmpeg/doc /usr/lib/btbn-ffmpeg/bin/ffplay
 fi
-
 # ffmpeg -> arm64
 if [[ "${TARGETARCH}" == "arm64" ]]; then
     mkdir -p /usr/lib/btbn-ffmpeg
@@ -39,16 +32,11 @@ if [[ "${TARGETARCH}" == "arm64" ]]; then
     rm -rf btbn-ffmpeg.tar.xz /usr/lib/btbn-ffmpeg/doc /usr/lib/btbn-ffmpeg/bin/ffplay
 fi
 EOF
-
 RUN --mount=type=bind,from=builder,source=/wheels,target=/deps/wheels \
     pip3 install -U /deps/wheels/*.whl
-
 WORKDIR /app
-
 ENV PATH /usr/lib/btbn-ffmpeg/bin:$PATH
-
 # Copy the application files
 COPY --link . .
-
 # Set the entry point to the application
 CMD ["python3", "./mqtt_client.py"]

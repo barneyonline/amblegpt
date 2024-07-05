@@ -100,6 +100,7 @@ Some example SUMMARIES are
 TITLE is a one sentence summary of the event. Use no more than 10 words.
 
 Write your answer in {RESULT_LANGUAGE} language."""
+
 PROMPT_TEMPLATE = config.get("prompt", DEFAULT_PROMPT)
 RESULT_LANGUAGE = config.get("result_language", "english")
 PER_CAMERA_CONFIG = config.get("per_camera_configuration", {})
@@ -329,7 +330,12 @@ def on_connect(client, userdata, flags, rc):
             "command_topic": MQTT_HA_SWITCH_COMMAND_TOPIC,
             "state_topic": MQTT_HA_SWITCH_STATE_TOPIC,
             "unique_id": "amblegptd",
-            "device": {"identifiers": ["amblegpt0a"], "name": "AmbleGPT"},
+            "device": {
+                "identifiers": ["amblegpt0a"],
+                "name": "AmbleGPT",
+                "manufacturer": "AmbleGPT",
+                "model": VIDEO_SERVICE.capitalize()
+            },
         }
         client.publish(MQTT_HA_SWITCH_CONFIG_TOPIC, json.dumps(config_message), retain=True)
         client.publish(MQTT_HA_SWITCH_STATE_TOPIC, "ON", retain=True)
