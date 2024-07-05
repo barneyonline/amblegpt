@@ -315,7 +315,7 @@ def process_message(payload):
         if event_id in ongoing_tasks:
             del ongoing_tasks[event_id]
 
-def on_connect(client, userdata, flags, rc):
+def on_connect(client, userdata, flags, rc, properties=None):
     logging.info("Connected with result code " + str(rc))
     if rc > 0:
         print("Connected with result code", rc)

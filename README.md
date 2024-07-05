@@ -67,6 +67,7 @@ export OPENAI_API_KEY=YOUR_KEY_HERE
 
 Create `config.yml` with the following values. Remember to change Frigate or Scrypted IP`.
 ```yaml
+video_service: "frigate"  # or "scrypted"
 frigate_server_ip: YOUR_FRIGATE_IP
 frigate_server_port: 5000
 scrypted_server_ip: YOUR_SCRYPTED_IP
@@ -74,29 +75,26 @@ scrypted_server_port: 9090
 mqtt_broker: YOUR_MQTT_BROKER_IP
 mqtt_port: 1883
 result_language: english
-mqtt_username: YOUR_MQTT_USER # optional
-mqtt_password: YOUR_MQTT_PASSWORD # optional
-verbose_summary_mode: false #optional, default true
-
+mqtt_username: YOUR_MQTT_USER  # optional
+mqtt_password: YOUR_MQTT_PASSWORD  # optional
+verbose_summary_mode: false  # optional, default true
 #more optional configs are below
-
-prompt: > #optional
-  If necessary, uncomment this and use your prompt here
-  The default prompt can be found in mqtt_client.py
-
-per_camera_configuration: #optional
-  # The camera name must match Frigate or Scrypted
-  Front Door:
-    # The custom prompt is optional and is used to provide more context for GPT to better understand the footage.
-    # This will be inserted into the prompt before sending it to GPT.
-    custom_prompt: >
-      The camera that took the footage is a doorbell camera outside the front door of the house.
-      The door is on the left side of the video frame and the exit is on the right side.
-  Outside:
-    custom_prompt: >
-      The camera that took the footage is mounted on the frame of the front window of the house facing the street.
-      The street allow guest parking and it is normal to see cars parked on the street.
-      There might also be people walking (with their dogs) on the sidewalk before 9pm.
+prompt: >  #optional
+ If necessary, uncomment this and use your prompt here
+ The default prompt can be found in mqtt_client.py
+per_camera_configuration:  #optional
+# The camera name must match Frigate or Scrypted
+ Front Door:
+  # The custom prompt is optional and is used to provide more context for GPT to better understand the footage.
+  # This will be inserted into the prompt before sending it to GPT.
+  custom_prompt: >
+   The camera that took the footage is a doorbell camera outside the front door of the house.
+   The door is on the left side of the video frame and the exit is on the right side.
+ Outside:
+  custom_prompt: >
+   The camera that took the footage is mounted on the frame of the front window of the house facing the street.
+   The street allows guest parking and it is normal to see cars parked on the street.
+   There might also be people walking (with their dogs) on the sidewalk before 9pm.
 ```
 
 ### Run AmbleGPT
