@@ -6,16 +6,14 @@ Video surveilance footage analyst powered by GPT-4o.
 
 ## Summary
 
-AmbleGPT is activated by a Frigate event via MQTT and analyzes the event clip using the OpenAI GPT-4 Vision API. It returns an easy-to-understand, context-rich summary. AmbleGPT then publishes this summary text in an MQTT message. The message can be received by the Home Assistant Frigate Notification Automation and sent to a user via iOS/Android notifications.
+Fork of [mhaowork's amblegpt](https://github.com/mhaowork/amblegpt) with support for Scrypted and Frigate.
+All credit to the original contributors.
 
 **⚠️ Warning: this repo is under active development. Please expect bugs and imperfections. You're welcome to submit issues.**
 
 
 ## Recent Updates
-* Update to using GPT-4o. Half the price and better vision performance.
-* An option `add_ha_switch` for adding a Switch in Home Assistant to allow turning off AmbleGPT when AI summary is not needed. Also see [Home Assistant Switch](#home-assistant-switch) section below. (2023-12-03)
-* An option for less verbose summary: see `verbose_summary_mode` below (2023-11-30)
-* Use ffmpeg (if available) for sampling video . Thanks @skrashevich for the contribution (2023-11-30)
+* Initial support for Scrypted (untested)
 
 
 ## Demo
@@ -67,23 +65,27 @@ Set your API key as an environment variable
 export OPENAI_API_KEY=YOUR_KEY_HERE
 ```
 
-Create `config.yml` with the following values. Remember to change `YOUR_FRIGATE_IP` and `YOUR_FRIGATE_IP`.
+Create `config.yml` with the following values. Remember to change Frigate or Scrypted IP`.
 ```yaml
 frigate_server_ip: YOUR_FRIGATE_IP
 frigate_server_port: 5000
+scrypted_server_ip: YOUR_SCRYPTED_IP
+scrypted_server_port: 9090
 mqtt_broker: YOUR_MQTT_BROKER_IP
 mqtt_port: 1883
-result_language: english # optional
+result_language: english
 mqtt_username: YOUR_MQTT_USER # optional
 mqtt_password: YOUR_MQTT_PASSWORD # optional
-verbose_summary_mode: false #optinal, default true
-add_ha_switch: false # optional, default false. if true, a Switch in Home Assistant to turn off/on AmbleGPT will be added
+verbose_summary_mode: false #optional, default true
+
+#more optional configs are below
+
 prompt: > #optional
-   If necessary, uncomment this and use your prompt here
-   The default prompt can be found in mqtt_client.py
+  If necessary, uncomment this and use your prompt here
+  The default prompt can be found in mqtt_client.py
 
 per_camera_configuration: #optional
-  # The camera name must match Frigate
+  # The camera name must match Frigate or Scrypted
   Front Door:
     # The custom prompt is optional and is used to provide more context for GPT to better understand the footage.
     # This will be inserted into the prompt before sending it to GPT.
@@ -101,12 +103,13 @@ per_camera_configuration: #optional
 Docker is recommended.
 
 Make sure to change `/path/to/your/config.yml` and `YOUR_OPENAI_API_KEY` in the command below.
+**Docker**
 ```shell
 docker run --detach --name amblegpt \
     --restart unless-stopped \
     -e OPENAI_API_KEY="$OPENAI_API_KEY" \
     -v /path/to/your/config.yml:/app/config.yml \
-    ghcr.io/mhaowork/amblegpt
+    ghcr.io/barneyonline/amblegpt:latest
 ```
 
 Alternatively, you can simply install deps in `requirements.txt`, set `.env` and run `mqtt_client.py`.
@@ -131,8 +134,3 @@ If `add_ha_switch` config is true, a switch will be automatically added in HA li
 ![image](https://github.com/mhaowork/amblegpt/assets/8702853/f058965a-2936-4e3c-ac9c-ce076074a662)
 
 
-
-## Future Work
-1. ~Allow easier prompt customization~
-2. ~Custom prompts per camera to allow GPT to understand the angle and context of each camera.~
-3. Further reduce # of tokens required to process a clip
