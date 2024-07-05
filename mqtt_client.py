@@ -330,8 +330,8 @@ def on_connect(client, userdata, flags, rc, properties=None):
             "unique_id": "amblegptd",
             "device": {"identifiers": ["amblegpt0a"], "name": "AmbleGPT"},
         }
-        client.publish(MQTT_HA_SWITCH_CONFIG_TOPIC, json.dumps(config_message))
-        client.publish(MQTT_HA_SWITCH_STATE_TOPIC, "ON")
+        client.publish(MQTT_HA_SWITCH_CONFIG_TOPIC, json.dumps(config_message), retain=True)
+        client.publish(MQTT_HA_SWITCH_STATE_TOPIC, "ON", retain=True)
     for topic in TOPICS_TO_SUBSCRIBE:
         client.subscribe(topic)
     logging.info(f"Subscribed to topics: {TOPICS_TO_SUBSCRIBE}")
@@ -344,7 +344,7 @@ def on_message(client, userdata, msg):
     if msg.topic == MQTT_HA_SWITCH_COMMAND_TOPIC:
         amblegpt_enabled = msg.payload.decode("utf-8").upper() == "ON"
         logging.info(f"AmbleGPT enabled: {amblegpt_enabled}")
-        client.publish(MQTT_HA_SWITCH_STATE_TOPIC, "ON" if amblegpt_enabled else "OFF")
+        client.publish(MQTT_HA_SWITCH_STATE_TOPIC, "ON" if amblegpt_enabled else "OFF", retain=True)
         return
     if msg.topic not in [MQTT_FRIGATE_TOPIC, MQTT_SCRYPTED_TOPIC]:
         return
@@ -385,7 +385,7 @@ def on_message(client, userdata, msg):
 
 def cleanup(client):
     logging.info("Exiting. Cleaning up")
-    client.publish(MQTT_HA_SWITCH_CONFIG_TOPIC, "")
+    client.publish(MQTT_HA_SWITCH_CONFIG_TOPIC, "", retain=True)
     client.disconnect()
 
 def handle_sigterm(client, signum, frame):
