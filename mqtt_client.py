@@ -32,7 +32,7 @@ VIDEO_SERVICE = config.get("video_service", "frigate").lower()
 MQTT_FRIGATE_TOPIC = "frigate/events"
 MQTT_SCRYPTED_TOPIC = "scrypted/events"
 MQTT_SUMMARY_TOPIC = "events/summary"
-MQTT_HA_SWITCH_TOPIC = "homeassistant/switch/amblegpt"
+MQTT_HA_SWITCH_TOPIC = f"homeassistant/switch/amblegpt_{VIDEO_SERVICE}"
 MQTT_HA_SWITCH_CONFIG_TOPIC = MQTT_HA_SWITCH_TOPIC + "/config"
 MQTT_HA_SWITCH_COMMAND_TOPIC = MQTT_HA_SWITCH_TOPIC + "/set"
 MQTT_HA_SWITCH_STATE_TOPIC = MQTT_HA_SWITCH_TOPIC + "/state"
@@ -50,6 +50,7 @@ FRIGATE_CLIP_ENDPOINT = "/api/events/{}/clip.mp4"
 SRIPTED_SERVER_IP = config.get("scrypted_server_ip")
 SRIPTED_SERVER_PORT = config.get("scrypted_server_port", 9090)
 Scrypted_CLIP_ENDPOINT = "/events/{}/clip.mp4"
+SCRYPTED_CAMERA_NAME = config.get("scrypted_camera_name")
 
 # Video frame sampling settings
 GAP_SECS = 3
@@ -99,7 +100,8 @@ Some example SUMMARIES are
 
 TITLE is a one sentence summary of the event. Use no more than 10 words.
 
-Write your answer in {RESULT_LANGUAGE} language."""
+Write your answer in {RESULT_LANGUAGE} language.
+"""
 
 PROMPT_TEMPLATE = config.get("prompt", DEFAULT_PROMPT)
 RESULT_LANGUAGE = config.get("result_language", "english")
@@ -326,12 +328,12 @@ def on_connect(client, userdata, flags, rc):
     if ADD_HA_SWITCH:
         TOPICS_TO_SUBSCRIBE.append(MQTT_HA_SWITCH_COMMAND_TOPIC)
         config_message = {
-            "name": "AmbleGPT",
+            "name": f"AmbleGPT {VIDEO_SERVICE.capitalize()}",
             "command_topic": MQTT_HA_SWITCH_COMMAND_TOPIC,
             "state_topic": MQTT_HA_SWITCH_STATE_TOPIC,
-            "unique_id": "amblegptd",
+            "unique_id": f"amblegpt_{VIDEO_SERVICE}",
             "device": {
-                "identifiers": ["amblegpt0a"],
+                "identifiers": [f"amblegpt_{VIDEO_SERVICE}"],
                 "name": "AmbleGPT",
                 "manufacturer": "AmbleGPT",
                 "model": VIDEO_SERVICE.capitalize()
