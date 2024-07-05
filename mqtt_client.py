@@ -99,8 +99,7 @@ Some example SUMMARIES are
 
 TITLE is a one sentence summary of the event. Use no more than 10 words.
 
-Write your answer in {RESULT_LANGUAGE} language.
-"""
+Write your answer in {RESULT_LANGUAGE} language."""
 PROMPT_TEMPLATE = config.get("prompt", DEFAULT_PROMPT)
 RESULT_LANGUAGE = config.get("result_language", "english")
 PER_CAMERA_CONFIG = config.get("per_camera_configuration", {})
@@ -317,7 +316,7 @@ def process_message(payload):
         if event_id in ongoing_tasks:
             del ongoing_tasks[event_id]
 
-def on_connect(client, userdata, flags, rc, properties=None):
+def on_connect(client, userdata, flags, rc):
     logging.info("Connected with result code " + str(rc))
     if rc > 0:
         print("Connected with result code", rc)

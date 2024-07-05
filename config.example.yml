@@ -9,6 +9,8 @@ result_language: english
 mqtt_username: YOUR_MQTT_USER  # optional
 mqtt_password: YOUR_MQTT_PASSWORD  # optional
 verbose_summary_mode: false  # optional, default true
+add_ha_switch: false # optional, default false. if true, a Switch in Home Assistant to turn off/on AmbleGPT will be added
+
 #more optional configs are below
 prompt: >  #optional
  If necessary, uncomment this and use your prompt here
