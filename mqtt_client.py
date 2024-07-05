@@ -19,9 +19,9 @@ from functools import partial
 import signal
 
 logging.basicConfig(level=logging.INFO, format="%(processName)s: %(message)s")
-
 ongoing_tasks = {}
 amblegpt_enabled = True
+
 config = yaml.safe_load(open("config.yml", "r"))
 
 # Define the service to use for video retrieval
@@ -46,9 +46,9 @@ FRIGATE_SERVER_PORT = config.get("frigate_server_port", 5000)
 FRIGATE_CLIP_ENDPOINT = "/api/events/{}/clip.mp4"
 
 # Define Scrypted server details for video retrieval
-SRIPTED_SERVER_IP = config.get("scrypted_server_ip")
-SRIPTED_SERVER_PORT = config.get("scrypted_server_port", 9090)
-Scrypted_CLIP_ENDPOINT = "/events/{}/clip.mp4"
+SCRYPTED_SERVER_IP = config.get("scrypted_server_ip")
+SCRYPTED_SERVER_PORT = config.get("scrypted_server_port", 9090)
+SCRYPTED_CLIP_ENDPOINT = "/api/events/{}/clip.mp4"
 SCRYPTED_CAMERA_NAME = config.get("scrypted_camera_name")
 
 # Video frame sampling settings
@@ -207,12 +207,9 @@ def extract_frames_ffmpeg(video_path, gap_secs):
     # FFmpeg command to extract frames every gap_secs seconds and resize them
     ffmpeg_command = [
         "ffmpeg",
-        "-i",
-        video_path,
-        "-vf",
-        f"fps=1/{gap_secs},scale=480:480:force_original_aspect_ratio=decrease",
-        "-q:v",
-        "2", # Quality level for JPEG
+        "-i", video_path,
+        "-vf", f"fps=1/{gap_secs},scale=480:480:force_original_aspect_ratio=decrease",
+        "-q:v", "2", # Quality level for JPEG
         os.path.join(frames_dir, "frame_%04d.jpg"),
     ]
     # Execute FFmpeg command
@@ -224,7 +221,7 @@ def extract_frames_ffmpeg(video_path, gap_secs):
             continue
         with open(os.path.join(frames_dir, frame_file), "rb") as file:
             frame_bytes = file.read()
-            frames.append(base64.b64encode(frame_bytes).decode("utf-8"))
+        frames.append(base64.b64encode(frame_bytes).decode("utf-8"))
     logging.info(f"Got {len(frames)} frames from video")
     return frames
 
@@ -256,10 +253,10 @@ def download_frigate_video_clip(event_id, gap_secs):
         return []
 
 def download_scrypted_video_clip(event_id, gap_secs):
-    if not SRIPTED_SERVER_IP:
+    if not SCRYPTED_SERVER_IP:
         logging.error("Scrypted server IP is not configured")
         return []
-    clip_url = f"http://{SRIPTED_SERVER_IP}:{SRIPTED_SERVER_PORT}{Scrypted_CLIP_ENDPOINT.format(event_id)}"
+    clip_url = f"http://{SCRYPTED_SERVER_IP}:{SCRYPTED_SERVER_PORT}{SCRYPTED_CLIP_ENDPOINT.format(event_id)}"
     logging.info(f"Requesting Scrypted video clip from URL: {clip_url}")
     response = requests.get(clip_url)
     logging.info(f"Scrypted response status code: {response.status_code}")
